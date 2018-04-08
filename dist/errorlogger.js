@@ -1,11 +1,13 @@
 /**
  * errorlogger.js 日志记录
- * 提供网页异常自动记录日志的功能，尤其适合在移动端页面调试使用
+ * 提供网页异常自动记录日志的功能，适合在移动端页面调试使用
  */
 
-(function() {
+(function () {
 	window.errorlogger = {
-		start: function() {
+		autoStore: true, // store log text automatically where invoke the log method
+		storeKey: 'arr-error', // the key in localstorage
+		start: function () {
 			/** 错误内容
 			 * date 记录日志的时间
 			 * msg 错误内容
@@ -16,45 +18,66 @@
 			errorElement.prototype.date = "";
 			errorElement.prototype.msg = "";
 			errorElement.prototype.url = "";
-			errorElement.prototype.l = "";
+			errorElement.prototype.line = "";
 
-			window.onerror = function(msg, url, l) {
-				var arrname = "arr-error";
+			window.onerror = function (msg, url, l) {
+				let self = errorlogger
 
-				var ele = new errorElement();
-				ele.date = new Date();
-				ele.msg = msg;
-				ele.url = url;
-				ele.l = l;
+				let ele = new errorElement()
+				ele.date = self.formatDateString(new Date())
+				ele.msg = msg
+				ele.url = url
+				ele.line = l
 
-				if(!localStorage[arrname]) {
-					var arr = [];
-					arr.push(ele);
+				let txt = "errorlogger catches a new error !!! " + JSON.stringify(ele)
+				let log = self.log(txt)
 
-					localStorage[arrname] = JSON.stringify(arr);
-				} else {
-					var arrp = JSON.parse(localStorage[arrname]);
-					arrp.push(ele);
-					localStorage[arrname] = JSON.stringify(arrp);
+				if (!self.autoStore) {
+					self.saveLocal(log)
 				}
-
-				console.log("errorlogger catches a new log !!! " + JSON.stringify(ele));
 			}
 
-			console.log("errorlogger start working !!!");
+			console.log("errorlogger start working !!!")
 		},
-		outputErrors: function() {
-			if(localStorage["arr-error"] == null) {
-				console.log("errorlogger : there is no error!!");
+		saveLocal: function (logText) {
+			let storeKey = this.storeKey
+			if (!localStorage[storeKey]) {
+				let arr = []
+				arr.push(logText)
+
+				localStorage[storeKey] = JSON.stringify(arr)
 			} else {
-				console.log(JSON.parse(localStorage["arr-error"]));
+				let arr = JSON.parse(localStorage[storeKey])
+				arr.push(logText)
+				localStorage[storeKey] = JSON.stringify(arr)
 			}
 		},
-		clearErrorLogs: function() {
-			localStorage.removeItem("arr-error");
-			console.log("errorlogger : clear error success!!");
+		showAll: function () {
+			let storeKey = this.storeKey
+			if (localStorage[storeKey] == null) {
+				console.log("errorlogger : there is no error!!")
+			} else {
+				console.log(JSON.parse(localStorage[storeKey]))
+			}
+		},
+		clearAll: function () {
+			localStorage.removeItem(this.storeKey)
+			console.log("errorlogger : clear error success!!")
+		},
+		formatDateString: function (date) {
+			return date.toJSON().replace(/T/g, ' ').substring(0, 19)
+		},
+		log: function (txt) {
+			let self = this
+			let log = `[errorlogger] [${self.formatDateString(new Date())}]: ${txt}`
+			console.log(log)
+			if (self.autoStore) {
+				self.saveLocal(log)
+			}
+
+			return log
 		}
 	}
 
-	errorlogger.start();
+	errorlogger.start()
 })();

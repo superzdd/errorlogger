@@ -1,19 +1,23 @@
 <!DOCTYPE html>
 <html>
 
-	<head>
-		<meta charset="UTF-8">
-		<title></title>
-	</head>
+<head>
+	<meta charset="UTF-8">
+	<title></title>
+</head>
 
-	<body>
-		<script src="../../dist/errorlogger.js"></script>
+<body>
+	<script src="../dist/errorlogger.js"></script>
 
-		<script>
-				var a = c/0;
-        // you can see that errorlogger.js will automatically log the error, and it will also show message in console
-		</script>
+	<script>
+		// the code below will show formatted log text
+		errorlogger.log('hello world');
 
-	</body>
+		// the code below will throw an error
+		// you can see that errorlogger.js will automatically log the error, and it will also show message in console
+		var a = c / 0;
+	</script>
+
+</body>
 
 </html>
